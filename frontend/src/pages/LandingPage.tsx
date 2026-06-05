@@ -80,13 +80,19 @@ export default function LandingPage() {
             A collaborative workspace built to capture late-night audio, build synchronized queues, and shape playlist vibes.
           </p>
 
-          <div ref={ctaRef} className="pt-2">
+          <div ref={ctaRef} className="pt-2 flex flex-wrap items-center justify-center gap-4">
             <button 
               onClick={() => handleScrollToSection('player')}
-              className="px-6 py-3 text-[13.5px] font-semibold tracking-wide bg-accent hover:bg-accent-hover active:bg-accent-active text-paper rounded-full cursor-pointer transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] inline-flex items-center gap-2"
+              className="px-6 py-3 text-[13.5px] font-semibold tracking-wide bg-paper-2 hover:bg-paper-3 border border-rule hover:border-neutral/40 text-ink rounded-full cursor-pointer transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] inline-flex items-center gap-2"
             >
-              Open Player <ArrowDown size={14} weight="bold" />
+              Demo Player <ArrowDown size={14} weight="bold" />
             </button>
+            <a 
+              href="/api/auth/login"
+              className="px-6 py-3 text-[13.5px] font-semibold tracking-wide bg-accent hover:bg-accent-hover active:bg-accent-active text-paper rounded-full cursor-pointer transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] inline-flex items-center gap-2 decoration-none"
+            >
+              Connect with Spotify
+            </a>
           </div>
         </div>
       </main>

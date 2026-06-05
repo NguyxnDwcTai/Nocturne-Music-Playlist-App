@@ -1,16 +1,56 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+
+// Import routers
+import authRouter from './src/routes/auth.js';
+import spotifyRouter from './src/routes/spotify.js';
+import favoritesRouter from './src/routes/favorites.js';
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3001;
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/spotify-app';
 
-app.use(cors());
+// MongoDB Connection (graceful — server continues even without Mongo)
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('✅ Successfully connected to MongoDB.'))
+  .catch((err) => {
+    console.warn('⚠️  MongoDB connection failed:', err.message);
+    console.warn('⚠️  Server will continue without database. Auth/favorites features will not work.');
+    console.warn('⚠️  To fix: Install MongoDB or update MONGODB_URI in .env');
+  });
+
+// CORS Configuration
+const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:3000'];
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true,
+}));
+
 app.use(express.json());
+app.use(cookieParser());
 
-// Mock Playlist Data with real playable MP3 streams
+// Mount API routers
+app.use('/api/auth', authRouter);
+app.use('/api/spotify', spotifyRouter);
+app.use('/api/favorites', favoritesRouter);
+
+// ==========================================
+// PRESERVE LEGACY NOCTURNE MOCK ROUTES
+// ==========================================
+
 const playlists = [
   {
     id: 'after-hours',
@@ -119,14 +159,12 @@ const playlists = [
   }
 ];
 
-// Mock App Stats
 const stats = {
   activeCurators: 1204,
   totalPlaytimeHours: 45281,
   tracksSynchronized: 89204
 };
 
-// API Endpoints
 app.get('/api/playlists', (req, res) => {
   res.json(playlists);
 });
@@ -153,6 +191,8 @@ app.post('/api/subscribe', (req, res) => {
   }, 1000);
 });
 
+// Start listening
 app.listen(PORT, () => {
   console.log(`Nocturne API Server running on port ${PORT}`);
 });
+
